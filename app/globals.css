@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  --background: #D6EFD8;
+  --foreground: #1A3636;
+
+  --ssm-mint: #D6EFD8;
+  --ssm-forest: #1A3636;
+  --ssm-pearl: #F6F5F2;
+  --ssm-slate: #4A5C5C;
+  --ssm-gold: #C5A059;
+
+  --card: #F6F5F2;
+  --card-foreground: #1A3636;
+
+  --primary: #1A3636;
+  --primary-foreground: #D6EFD8;
+
+  --secondary: #D6EFD8;
+  --secondary-foreground: #1A3636;
+
+  --muted: #4A5C5C;
+  --muted-foreground: #F6F5F2;
+
+  --accent: #C5A059;
+  --accent-foreground: #1A3636;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-mint: var(--ssm-mint);
+  --color-forest: var(--ssm-forest);
+  --color-pearl: var(--ssm-pearl);
+  --color-slate: var(--ssm-slate);
+  --color-gold: var(--ssm-gold);
+
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+
+  --font-inter: var(--font-inter);
+  --font-outfit: var(--font-outfit);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased font-[family-name:var(--font-inter)];
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold tracking-tight text-forest font-[family-name:var(--font-outfit)];
+  }
+}
+
+.glass {
+  @apply bg-white/10 backdrop-blur-md border border-white/20;
+}
+
+.premium-card {
+  @apply bg-pearl p-6 rounded-3xl shadow-sm border border-mint/20 hover:shadow-md transition-all duration-300;
+}
