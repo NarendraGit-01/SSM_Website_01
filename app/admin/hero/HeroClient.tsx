@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Save, ImageIcon, RefreshCw, Plus, Edit2, Trash2, X, CheckCircle, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { HeroSlide, ServiceCategory } from "@/lib/siteData";
-import { saveHeroSlides, saveServiceCategory, deleteServiceCategory, uploadImage } from "@/app/actions";
+import { HeroSlide, ServiceCategory, HeroMetric } from "@/lib/siteData";
+import { saveHeroSlides, saveServiceCategory, deleteServiceCategory, uploadImage, saveHeroMetrics } from "@/app/actions";
 import NextImage from "next/image";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 type Toast = { type: "success" | "error"; message: string } | null;
 type ConfirmDialog = { title: string; message: string; onConfirm: () => void } | null;
 
-export default function HeroClient({ initialSlides, initialCategories }: { initialSlides: HeroSlide[], initialCategories: ServiceCategory[] }) {
+export default function HeroClient({ initialSlides, initialCategories, initialMetrics }: { initialSlides: HeroSlide[], initialCategories: ServiceCategory[], initialMetrics: HeroMetric[] }) {
     const router = useRouter();
     const [slides, setSlides] = useState<HeroSlide[]>(initialSlides);
     const [saved, setSaved] = useState(false);
@@ -25,6 +25,7 @@ export default function HeroClient({ initialSlides, initialCategories }: { initi
     const [isUploading, setIsUploading] = useState(false);
     const [toast, setToast] = useState<Toast>(null);
     const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>(null);
+    const [metrics, setMetrics] = useState<HeroMetric[]>(initialMetrics);
 
     const showToast = (type: "success" | "error", message: string) => {
         setToast({ type, message });
@@ -39,10 +40,57 @@ export default function HeroClient({ initialSlides, initialCategories }: { initi
 
     const handleSave = async () => {
         setIsSaving(true);
-        await saveHeroSlides(slides);
-        setSaved(true);
+        const slidesRes = await saveHeroSlides(slides);
+        const metricsRes = await saveHeroMetrics(metrics);
+
+        if (slidesRes.success && metricsRes.success) {
+            setSaved(true);
+            showToast("success", "Hero section updated!");
+            setTimeout(() => setSaved(false), 3000);
+        } else {
+            showToast("error", slidesRes.error || metricsRes.error || "Save failed.");
+        }
         setIsSaving(false);
-        setTimeout(() => setSaved(false), 3000);
+    };
+
+    const updateMetric = (id: number, field: keyof HeroMetric, value: string) => {
+        setMetrics(metrics.map(m => m.id === id ? { ...m, [field]: value } : m));
+        setSaved(false);
+    };
+
+    const addSlide = () => {
+        const newId = slides.length > 0 ? Math.max(...slides.map(s => s.id)) + 1 : 1;
+        const newSlide: HeroSlide = {
+            id: newId,
+            img: "https://images.unsplash.com/photo-1590069230005-db393739d22b?q=80&w=1600&auto=format&fit=crop",
+            tag: "New Tag",
+            title: "New Headline",
+            sub: "New description text goes here."
+        };
+        setSlides([...slides, newSlide]);
+        setPreviewIdx(slides.length);
+        setSaved(false);
+    };
+
+    const removeSlide = (id: number) => {
+        if (slides.length <= 1) {
+            showToast("error", "You must have at least one hero slide.");
+            return;
+        }
+
+        setConfirmDialog({
+            title: "Delete Slide",
+            message: "Are you sure you want to delete this hero slide?",
+            onConfirm: () => {
+                const newSlides = slides.filter(s => s.id !== id);
+                setSlides(newSlides);
+                if (previewIdx >= newSlides.length) {
+                    setPreviewIdx(Math.max(0, newSlides.length - 1));
+                }
+                setSaved(false);
+                setConfirmDialog(null);
+            }
+        });
     };
 
     // --- Category Actions ---
@@ -120,23 +168,31 @@ export default function HeroClient({ initialSlides, initialCategories }: { initi
             <header className="flex justify-between items-end mb-10">
                 <div>
                     <h1 className="text-4xl font-black text-forest uppercase">Hero Slides</h1>
-                    <p className="text-slate/60 font-medium mt-1">Edit all 4 carousel slides shown on the homepage</p>
+                    <p className="text-slate/60 font-medium mt-1">Manage carousel slides shown on the homepage</p>
                 </div>
-                <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className={`flex items-center gap-2 px-8 py-4 rounded-2xl font-black transition-all ${saved ? "bg-emerald-500 text-white" : "bg-forest text-mint shadow-xl disabled:opacity-50"}`}
-                >
-                    {isSaving ? <><RefreshCw size={18} className="animate-spin" /> Saving...</> : saved ? <><RefreshCw size={18} /> Saved!</> : <><Save size={18} /> Save All</>}
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        onClick={addSlide}
+                        className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold bg-white text-forest border-2 border-forest/10 hover:border-forest hover:bg-forest/5 transition-all shadow-sm"
+                    >
+                        <Plus size={18} /> Add Slide
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className={`flex items-center gap-2 px-8 py-4 rounded-2xl font-black transition-all ${saved ? "bg-emerald-500 text-white" : "bg-forest text-mint shadow-xl disabled:opacity-50"}`}
+                    >
+                        {isSaving ? <><RefreshCw size={18} className="animate-spin" /> Saving...</> : saved ? <><RefreshCw size={18} /> Saved!</> : <><Save size={18} /> Save All</>}
+                    </button>
+                </div>
             </header>
 
             {/* Preview */}
             <div className="relative aspect-[21/9] rounded-[2.5rem] overflow-hidden shadow-2xl mb-12 bg-forest">
                 <AnimatePresence mode="sync">
                     <motion.img
-                        key={slides[previewIdx].img}
-                        src={slides[previewIdx].img}
+                        key={slides[previewIdx]?.img}
+                        src={slides[previewIdx]?.img}
                         alt="Preview"
                         className="absolute inset-0 w-full h-full object-cover"
                         initial={{ opacity: 0 }}
@@ -148,10 +204,10 @@ export default function HeroClient({ initialSlides, initialCategories }: { initi
                 <div className="absolute inset-0 bg-gradient-to-r from-forest/80 to-transparent flex items-end p-12">
                     <div>
                         <span className="inline-block bg-gold text-forest text-xs font-black tracking-[0.2em] uppercase px-3 py-1 rounded-full mb-4">
-                            {slides[previewIdx].tag}
+                            {slides[previewIdx]?.tag}
                         </span>
-                        <h2 className="text-4xl font-black text-white whitespace-pre-line leading-tight mb-3">{slides[previewIdx].title}</h2>
-                        <p className="text-white/70 max-w-lg">{slides[previewIdx].sub}</p>
+                        <h2 className="text-4xl font-black text-white whitespace-pre-line leading-tight mb-3">{slides[previewIdx]?.title}</h2>
+                        <p className="text-white/70 max-w-lg">{slides[previewIdx]?.sub}</p>
                     </div>
                 </div>
                 <div className="absolute top-6 right-6 flex gap-2">
@@ -184,10 +240,17 @@ export default function HeroClient({ initialSlides, initialCategories }: { initi
                             )}
                         </div>
                         <div className="p-8 flex flex-col gap-5">
-                            <div className="flex flex-col gap-2">
+                            <div className="flex justify-between items-center mb-1">
                                 <label className="text-[10px] font-black uppercase text-slate/40 tracking-widest">Category Tag</label>
-                                <input className="bg-pearl/50 border-none rounded-xl p-3 text-forest font-bold text-sm" value={slide.tag} onChange={(e) => update(slide.id, "tag", e.target.value)} placeholder="e.g. Steel Gates" />
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); removeSlide(slide.id); }}
+                                    className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                                    title="Delete Slide"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
                             </div>
+                            <input className="bg-pearl/50 border-none rounded-xl p-3 text-forest font-bold text-sm" value={slide.tag} onChange={(e) => update(slide.id, "tag", e.target.value)} placeholder="e.g. Steel Gates" />
                             <div className="flex flex-col gap-2">
                                 <label className="text-[10px] font-black uppercase text-slate/40 tracking-widest">Headline (use \n for line break)</label>
                                 <textarea rows={2} className="bg-pearl/50 border-none rounded-xl p-3 text-forest font-bold text-sm" value={slide.title} onChange={(e) => update(slide.id, "title", e.target.value)} />
@@ -209,6 +272,37 @@ export default function HeroClient({ initialSlides, initialCategories }: { initi
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* ===== HERO METRICS SECTION ===== */}
+            <div className="border-t-2 border-forest/5 pt-16 mb-20">
+                <header className="mb-10">
+                    <h2 className="text-3xl font-black text-forest uppercase">Hero Metrics</h2>
+                    <p className="text-slate/60 font-medium mt-1">Edit the 4 statistics shown at the bottom of the hero section</p>
+                </header>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {metrics.map((m) => (
+                        <div key={m.id} className="bg-white p-6 rounded-[2rem] border border-forest/5 shadow-sm flex flex-col gap-4">
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[10px] font-black uppercase text-slate/40 tracking-widest">Value (e.g. 15+)</label>
+                                <input
+                                    className="bg-pearl/50 border-none rounded-xl p-3 text-forest font-black text-xl"
+                                    value={m.value}
+                                    onChange={(e) => updateMetric(m.id, "value", e.target.value)}
+                                />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[10px] font-black uppercase text-slate/40 tracking-widest">Label</label>
+                                <input
+                                    className="bg-pearl/50 border-none rounded-xl p-3 text-forest font-bold text-xs"
+                                    value={m.label}
+                                    onChange={(e) => updateMetric(m.id, "label", e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* ===== HOME PAGE CATEGORIES SECTION ===== */}

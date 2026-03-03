@@ -53,9 +53,24 @@ export type SiteConfig = {
     facebook: string;
     instagram: string;
     twitter: string;
+    googleMapsUrl: string;
+    googleMapsEmbedUrl: string;
+};
+
+export type HeroMetric = {
+    id: number;
+    value: string;
+    label: string;
 };
 
 // ---- Default Data ----
+
+export const heroMetrics: HeroMetric[] = [
+    { id: 1, value: "15+", label: "Years Experience" },
+    { id: 2, value: "1200+", label: "Completed Projects" },
+    { id: 3, value: "50+", label: "Skilled Artisans" },
+    { id: 4, value: "98%", label: "Satisfied Clients" },
+];
 
 export const heroSlides: HeroSlide[] = [
     {
@@ -141,4 +156,6 @@ export const siteConfig: SiteConfig = {
     facebook: "https://facebook.com/ssm",
     instagram: "https://instagram.com/ssm",
     twitter: "https://twitter.com/ssm",
+    googleMapsUrl: "https://www.google.com/maps/place/4-654%2F79%2F1,+Sisu+Mandir+Area,+Mullamuru,+Vinukonda,+Andhra+Pradesh+522647",
+    googleMapsEmbedUrl: "https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1917.2349673036683!2d79.7305338!3d16.0410857!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a4abd8569337f53%3A0x648593472b21fa0a!2s4-654%2F79%2F1%2C%20Sisu%20Mandir%20Area%2C%20Mullamuru%2C%20Vinukonda%2C%20Andhra%20Pradesh%20522647!5e0!3m2!1sen!2sin!4v1772440229781!5m2!1sen!2sin",
 };

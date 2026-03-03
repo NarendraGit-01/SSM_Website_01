@@ -60,15 +60,26 @@ export default function Footer({ config }: { config: any }) {
                     <ul className="flex flex-col gap-6 text-sm text-mint/70">
                         <li className="flex gap-3">
                             <MapPin className="text-mint shrink-0" size={20} />
-                            <span className="whitespace-pre-line">{config.address}</span>
+                            <a
+                                href={config.googleMapsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-mint transition-colors whitespace-pre-line"
+                            >
+                                {config.address}
+                            </a>
                         </li>
                         <li className="flex gap-3">
                             <Phone className="text-mint shrink-0" size={20} />
-                            <span>{config.phone}</span>
+                            <a href={`tel:${config.phone}`} className="hover:text-mint transition-colors">
+                                {config.phone}
+                            </a>
                         </li>
                         <li className="flex gap-3">
                             <Mail className="text-mint shrink-0" size={20} />
-                            <span>{config.email}</span>
+                            <a href={`mailto:${config.email}`} className="hover:text-mint transition-colors">
+                                {config.email}
+                            </a>
                         </li>
                     </ul>
                 </div>

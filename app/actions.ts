@@ -1,7 +1,7 @@
 "use server";
 
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { HeroSlide, ServiceItem, ProductItem, SiteConfig, ServiceCategory } from "@/lib/siteData";
+import { HeroSlide, ServiceItem, ProductItem, SiteConfig, ServiceCategory, HeroMetric } from "@/lib/siteData";
 import * as fallbacks from "@/lib/siteData";
 import { revalidatePath } from "next/cache";
 
@@ -26,6 +26,8 @@ export async function getSiteConfig() {
         aboutStory: data.about_story || fallbacks.siteConfig.aboutStory,
         missionText: data.mission_text || fallbacks.siteConfig.missionText,
         visionText: data.vision_text || fallbacks.siteConfig.visionText,
+        googleMapsUrl: data.google_maps_url || fallbacks.siteConfig.googleMapsUrl,
+        googleMapsEmbedUrl: data.google_maps_embed_url || fallbacks.siteConfig.googleMapsEmbedUrl,
     };
 }
 
@@ -46,15 +48,41 @@ export async function saveSiteConfig(newConfig: typeof fallbacks.siteConfig) {
         twitter: newConfig.twitter,
         about_story: newConfig.aboutStory,
         mission_text: newConfig.missionText,
-        vision_text: newConfig.visionText
+        vision_text: newConfig.visionText,
+        google_maps_url: newConfig.googleMapsUrl,
+        google_maps_embed_url: newConfig.googleMapsEmbedUrl,
     };
 
-    const { error } = await supabase.from("site_config").update(mapped).eq("id", (await getSiteConfigId()));
-    if (error) return { success: false, error: error.message };
+    // Fetch the real UUID of the existing row
+    const { data: existing } = await supabase
+        .from("site_config")
+        .select("id")
+        .limit(1)
+        .single();
+
+    let error;
+    if (existing?.id) {
+        // Row exists — update it using the real UUID
+        ({ error } = await supabase
+            .from("site_config")
+            .update(mapped)
+            .eq("id", existing.id));
+    } else {
+        // No row yet — insert a fresh one
+        ({ error } = await supabase
+            .from("site_config")
+            .insert(mapped));
+    }
+
+    if (error) {
+        console.error("saveSiteConfig error:", error);
+        return { success: false, error: error.message };
+    }
 
     revalidatePath("/", "layout");
     return { success: true };
 }
+
 
 async function getSiteConfigId() {
     const { data } = await supabase.from("site_config").select("id").limit(1).single();
@@ -217,6 +245,29 @@ export async function deleteProduct(id: number) {
     return { success: true };
 }
 
+// ==========================================
+// HERO METRICS
+// ==========================================
+export async function getHeroMetrics() {
+    if (!isSupabaseConfigured()) return fallbacks.heroMetrics;
+    const { data, error } = await supabase.from("hero_metrics").select("*").order("id");
+    if (error || !data || data.length === 0) return fallbacks.heroMetrics;
+    return data;
+}
+
+export async function saveHeroMetrics(metrics: HeroMetric[]) {
+    if (!isSupabaseConfigured()) {
+        return { success: false, error: "Supabase not configured." };
+    }
+
+    // Replace all existing metrics
+    await supabase.from("hero_metrics").delete().neq("id", 0);
+    const { error } = await supabase.from("hero_metrics").insert(metrics.map(({ id, ...rest }) => rest));
+
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/", "layout");
+    return { success: true };
+}
 
 // ==========================================
 // IMAGE UPLOAD

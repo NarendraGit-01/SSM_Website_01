@@ -2,9 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Target, Eye, Award, Users } from "lucide-react";
-import { SiteConfig } from "@/lib/siteData";
+import { SiteConfig, HeroMetric } from "@/lib/siteData";
 
-export default function AboutClient({ config }: { config: SiteConfig }) {
+export default function AboutClient({ config, metrics }: { config: SiteConfig, metrics: HeroMetric[] }) {
     return (
         <div className="min-h-screen pt-12 pb-24 px-6 bg-pearl">
             <div className="max-w-7xl mx-auto">
@@ -62,12 +62,7 @@ export default function AboutClient({ config }: { config: SiteConfig }) {
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                    {[
-                        { label: "Years Experience", value: "15+", icon: Award },
-                        { label: "Completed Projects", value: "1200+", icon: Target },
-                        { label: "Skilled Artisans", value: "50+", icon: Users },
-                        { label: "Satisfied Clients", value: "98%", icon: Users },
-                    ].map((stat, i) => (
+                    {metrics.map((stat, i) => (
                         <div key={stat.label} className="flex flex-col items-center text-center">
                             <span className="text-5xl font-black text-forest mb-2">{stat.value}</span>
                             <span className="text-xs font-bold text-gold uppercase tracking-widest">{stat.label}</span>

@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
-import { HeroSlide } from "@/lib/siteData";
+import { HeroSlide, HeroMetric } from "@/lib/siteData";
 
-export default function Hero({ slides }: { slides: HeroSlide[] }) {
+export default function Hero({ slides, metrics }: { slides: HeroSlide[], metrics: HeroMetric[] }) {
     const [current, setCurrent] = useState(0);
     const [dir, setDir] = useState(1);
 
@@ -110,10 +110,10 @@ export default function Hero({ slides }: { slides: HeroSlide[] }) {
 
                 {/* Stats bar */}
                 <div className="mt-20 flex flex-wrap gap-12 border-t border-white/10 pt-10">
-                    {[["15+", "Years in Business"], ["1200+", "Projects Done"], ["50+", "Expert Craftsmen"], ["98%", "Client Satisfaction"]].map(([val, label]) => (
-                        <div key={label} className="flex flex-col">
-                            <span className="text-3xl font-black text-mint">{val}</span>
-                            <span className="text-xs text-white/50 font-semibold tracking-widest uppercase mt-1">{label}</span>
+                    {metrics.map((m) => (
+                        <div key={m.label} className="flex flex-col">
+                            <span className="text-3xl font-black text-mint">{m.value}</span>
+                            <span className="text-xs text-white/50 font-semibold tracking-widest uppercase mt-1">{m.label}</span>
                         </div>
                     ))}
                 </div>

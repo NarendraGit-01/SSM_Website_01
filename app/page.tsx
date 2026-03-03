@@ -3,18 +3,19 @@ import ServiceHighlights from "@/components/sections/ServiceHighlights";
 import WhyChooseUs from "@/components/sections/WhyChooseUs";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getHeroSlides, getServices, getSiteConfig, getServiceCategories } from "@/app/actions";
+import { getHeroSlides, getServices, getSiteConfig, getServiceCategories, getHeroMetrics } from "@/app/actions";
 
 export default async function Home() {
   const slides = await getHeroSlides();
   const services = await getServices();
   const config = await getSiteConfig();
   const categories = await getServiceCategories();
+  const metrics = await getHeroMetrics();
   const featured = services.slice(0, 3);
 
   return (
     <div className="flex flex-col">
-      <Hero slides={slides} />
+      <Hero slides={slides} metrics={metrics} />
       <ServiceHighlights categories={categories} />
 
       {/* Featured Works Preview */}

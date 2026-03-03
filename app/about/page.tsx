@@ -1,7 +1,8 @@
-import { getSiteConfig } from "@/app/actions";
+import { getSiteConfig, getHeroMetrics } from "@/app/actions";
 import AboutClient from "./AboutClient";
 
 export default async function AboutPage() {
     const config = await getSiteConfig();
-    return <AboutClient config={config} />;
+    const metrics = await getHeroMetrics();
+    return <AboutClient config={config} metrics={metrics} />;
 }
