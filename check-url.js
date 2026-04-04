@@ -1,0 +1,1 @@
+fetch('https://qkiiismsqqfkonxxwaid.supabase.co/storage/v1/object/public/ssm-project-assets/ssm-project-assets-1775298916821.jpg').then(r => console.log('Status:', r.status)).catch(e => console.error(e));

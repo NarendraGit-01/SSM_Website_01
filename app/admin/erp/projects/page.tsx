@@ -3,6 +3,8 @@ import ProjectsClient from "./ProjectsClient";
 
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProjectsPage() {
     const [projects, customers, workers] = await Promise.all([
         getProjects(),

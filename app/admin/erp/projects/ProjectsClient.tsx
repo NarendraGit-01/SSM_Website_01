@@ -149,6 +149,7 @@ export default function ProjectsClient({ initialProjects, customers, workers }: 
         });
     };
 
+
     const openNew = () => {
         refreshCustomers(); // Quick refresh when opening form
         setEditing({
@@ -295,7 +296,7 @@ export default function ProjectsClient({ initialProjects, customers, workers }: 
         setIsSaving(true);
         const formData = new FormData();
         formData.append("file", file);
-        const res = await uploadERPFile(formData, "docs");
+        const res = await uploadERPFile(formData, "ssm-project-assets");
         if (res.success) {
             const updatedProject = { ...detail, [field]: res.data };
             const saveRes = await saveProject(updatedProject);
@@ -548,20 +549,22 @@ export default function ProjectsClient({ initialProjects, customers, workers }: 
                             onClick={() => setDetail(p)}>
                             <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                                         <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest ${STATUS_COLORS[p.status]}`}>{p.status}</span>
-                                        <span className="text-[10px] font-semibold text-slate/40 bg-slate/5 px-2.5 py-1 rounded-full">{p.category}</span>
-                                        <span className="text-[9px] font-mono text-slate/40 bg-slate/5 px-1.5 py-0.5 rounded-md border border-slate/10">ID: #{p.display_id || p.id?.slice(0, 8)}</span>
+                                        <span className="text-[10px] font-bold text-forest/60 bg-forest/5 px-2.5 py-1 rounded-full">{p.category}</span>
                                     </div>
-                                    <h3 className="font-black text-forest text-lg truncate">{p.model_name}</h3>
-                                    <div className="text-slate/40 text-xs font-bold mt-1.5 flex items-center gap-2">
-                                        <div className="flex items-center gap-1.5 lowercase">
-                                            <User size={12} className="text-slate/20" />
+                                    <div className="flex items-baseline gap-2 flex-wrap">
+                                        <h3 className="font-black text-forest text-lg truncate">{p.model_name}</h3>
+                                        <span className="text-xs font-mono font-bold text-forest/40">#{p.display_id || p.id?.slice(0, 8)}</span>
+                                    </div>
+                                    <div className="text-forest/70 text-xs font-bold mt-2 flex items-center gap-2">
+                                        <div className="flex items-center gap-1.5 capitalize">
+                                            <User size={13} className="text-forest/40" />
                                             {p.customers?.name || "No Customer"}
                                         </div>
-                                        {p.customers?.id && (
-                                            <span className="text-[9px] font-mono text-slate/30 bg-slate/5 px-1.5 py-0.5 rounded border border-slate/10">
-                                                CUST: #{p.customers.id.slice(0, 8)}
+                                        {p.customers?.display_id && (
+                                            <span className="text-[9px] font-mono font-bold text-forest/40 bg-forest/5 px-1.5 py-0.5 rounded border border-forest/10">
+                                                ID: {p.customers.display_id}
                                             </span>
                                         )}
                                     </div>
@@ -885,20 +888,32 @@ export default function ProjectsClient({ initialProjects, customers, workers }: 
                                 <div>
                                     <h3 className="text-xs font-black uppercase text-forest/50 tracking-widest mb-4">Project Gallery</h3>
                                     <div className="grid grid-cols-3 gap-3">
-                                        {(detail.project_photos || []).map((photo: any) => (
+                                        {[
+                                            ...(detail.agreement_url && /\.(jpg|jpeg|png|gif|webp)$/i.test(detail.agreement_url) ? [{ id: 'doc-agreement', url: detail.agreement_url, isSpecial: 'Agreement' }] : []),
+                                            ...(detail.measurement_url && /\.(jpg|jpeg|png|gif|webp)$/i.test(detail.measurement_url) ? [{ id: 'doc-measurement', url: detail.measurement_url, isSpecial: 'Measurement' }] : []),
+                                            ...(detail.completion_url && /\.(jpg|jpeg|png|gif|webp)$/i.test(detail.completion_url) ? [{ id: 'doc-completion', url: detail.completion_url, isSpecial: 'Completion' }] : []),
+                                            ...(detail.project_photos || [])
+                                        ].map((photo: any) => (
                                             <div key={photo.id} className="relative aspect-square rounded-2xl overflow-hidden border border-forest/5 shadow-sm group">
                                                 <img src={photo.url} className="w-full h-full object-cover transition group-hover:scale-110" alt="Project" />
                                                 <div className="absolute inset-0 bg-forest/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
                                                     <a href={photo.url} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition">
                                                         <ExternalLink size={16} />
                                                     </a>
-                                                    <button
-                                                        onClick={() => handleDeletePhoto(photo)}
-                                                        className="p-2 bg-rose-500/20 hover:bg-rose-500/40 rounded-full text-white backdrop-blur-sm transition"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                    {!photo.isSpecial && (
+                                                        <button
+                                                            onClick={() => handleDeletePhoto(photo)}
+                                                            className="p-2 bg-rose-500/20 hover:bg-rose-500/40 rounded-full text-white backdrop-blur-sm transition"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    )}
                                                 </div>
+                                                {photo.isSpecial && (
+                                                    <div className="absolute bottom-0 left-0 right-0 bg-forest/80 backdrop-blur-sm p-1.5 flex justify-center">
+                                                        <span className="text-[10px] font-bold tracking-wider text-white uppercase">{photo.isSpecial}</span>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                         <label className="aspect-square rounded-2xl border-2 border-dashed border-forest/10 flex flex-col items-center justify-center gap-1.5 text-forest/40 hover:border-forest/30 hover:bg-forest/[0.02] transition cursor-pointer">
@@ -909,14 +924,20 @@ export default function ProjectsClient({ initialProjects, customers, workers }: 
                                                     const files = Array.from(e.target.files || []);
                                                     if (files.length === 0) return;
                                                     setIsSaving(true);
+                                                    let hasError = false;
                                                     for (const file of files) {
                                                         const formData = new FormData();
                                                         formData.append("file", file);
                                                         const res = await uploadERPFile(formData, "ssm-project-assets");
                                                         if (res.success) {
                                                             await supabase.from("project_photos").insert({ project_id: detail.id, url: res.data });
+                                                        } else {
+                                                            hasError = true;
+                                                            showToast("error", res.error || "Failed to upload to gallery");
                                                         }
                                                     }
+
+                                                    if (!hasError) showToast("success", "Gallery updated!");
 
                                                     // Fetch only updated photos to avoid dropping populated relations like transactions
                                                     const { data: newPhotos } = await supabase.from("project_photos").select("*").eq("project_id", detail.id).order("created_at", { ascending: true });
