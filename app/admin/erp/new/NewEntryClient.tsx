@@ -125,9 +125,14 @@ export default function NewEntryClient() {
             const [c, sc] = await Promise.all([getERPCategories(), getERPSubCategories()]);
             setDynamicCategories(c);
             setDynamicSubCategories(sc);
-            if (c.length > 0 && !project.category) {
-                setProject(p => ({ ...p, category: c[0] }));
-            }
+            setProducts(prev => {
+                if (c.length > 0 && prev.length > 0 && !prev[0].category) {
+                    const next = [...prev];
+                    next[0] = { ...next[0], category: c[0] };
+                    return next;
+                }
+                return prev;
+            });
         }
         loadCats();
     }, []);
