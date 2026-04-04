@@ -17,8 +17,8 @@ npm.cmd run dev
 ## 🔐 Admin Access
 
 Go to → **http://localhost:3000/admin/login**
-- **Email:** `admin@ssm.com`
-- **Password:** `ssm123`
+- **Email:** `admin@gmail.com`
+- **Password:** `Hello@123`
 
 ## 📄 Pages
 

@@ -90,7 +90,7 @@ function LoginForm() {
                                 required
                                 autoComplete="email"
                                 className="w-full bg-pearl border-none rounded-2xl p-5 pl-12 text-forest font-bold placeholder:text-slate/20 focus:ring-2 focus:ring-forest/20"
-                                placeholder="admin@ssm.com"
+                                placeholder="admin@gmail.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />

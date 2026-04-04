@@ -28,7 +28,7 @@ export default async function RootLayout({
 }>) {
   const config = await getSiteConfig();
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+    <html lang="en-IN" className={`${inter.variable} ${outfit.variable}`}>
       <body className="font-inter antialiased">
         <Navbar config={config} />
         <main className="min-h-screen pt-20">

@@ -14,8 +14,8 @@ export async function POST(request: NextRequest) {
             else authError = error.message;
         } else {
             // Fallback development credentials
-            const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@ssm.com";
-            const ADMIN_PASS = process.env.ADMIN_PASSWORD || "ssm123";
+            const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@gmail.com";
+            const ADMIN_PASS = process.env.ADMIN_PASSWORD || "Hello@123";
             if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
                 authSuccess = true;
             }
