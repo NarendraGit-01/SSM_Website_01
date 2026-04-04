@@ -181,6 +181,7 @@ export async function uploadProjectPhoto(formData: FormData, projectId: string) 
         .insert({ project_id: projectId, url: res.data });
 
     if (error) return ERR(error.message);
+    revalidatePath("/admin/erp/projects");
     return OK(res.data);
 }
 
